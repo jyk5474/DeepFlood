@@ -1,9 +1,4 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Program:To Identify the Flood/No Flood images using Sentinel 1 and Sentinal 2 images (Fused) 
-Input: Trained features of Sentinel 1 and Sentinel 2 images
-Output: Flood / No Flood 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#------------------------------------------------------------------------------------------------------------------------
+
 "IMPORT THE LIBRARIES"
 
 import numpy as np

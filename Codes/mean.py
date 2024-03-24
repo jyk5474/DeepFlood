@@ -1,14 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Program:To Take the Mean of the Image bands 
-Input: Bands for Sentinel-2 for flood (All 12 bands)
-       Bands for Sentinel-2 for No flood (All 12 bands)
-       Bands for Sentinel-1 for flood (S1_2019-03-22_VH.png and S1_2019-03-22_VH.png )
-       Bands for Sentinel-1 for No flood (S1_2019-02-22_VH.png and S1_2019-02-22_VH.png )
-Output: Mean image of Sentinel-2 Flood (S2_FloodMean.png)
-        Mean image of Sentinel-2 Flood (S2_NoFloodMean.png)
-        Mean image of Sentinel-1 Flood (S1_FloodMean.png)
-        Mean image of Sentinel-1 Flood (S1_FloodMean.png)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 import cv2 
 import matplotlib.pyplot as plt
 from skimage.io import imread

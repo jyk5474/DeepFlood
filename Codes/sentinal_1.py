@@ -1,9 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Program:To Identify the Flood/No Flood images using Sentinel 1 images 
-Input: Flood and NoFlood VV and VH images mean image.
-Output: Flood / No Flood
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#------------------------------------------------------------------------------------------------------------------------
 "IMPORT THE LIBRARIES"
 
 import numpy as np
