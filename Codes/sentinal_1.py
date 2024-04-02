@@ -120,6 +120,7 @@ def get_outputs(model):
             outputs.append(layer.output)
     return layer_names,outputs
 
+layer_names, outputs = get_outputs(model)
 
 layer_names,outputs=get_outputs(model)
 
