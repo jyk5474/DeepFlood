@@ -1,84 +1,39 @@
-from tensorflow.keras.preprocessing.image import img_to_array
-from tensorflow.keras.models import load_model
 import numpy as np
+import tensorflow as tf
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Conv2D, UpSampling2D, BatchNormalization, Activation
+from tensorflow.keras.preprocessing.image import load_img, img_to_array
 
-import cv2
-path1 = '/content/TestNoFlood/0.jpg'
-image = cv2.imread(path1)
-orig = image.copy()
+# Load the pre-trained MobileNetV2 model
+base_model = MobileNetV2(input_shape=(224, 224, 3), include_top=False, weights='imagenet')
+base_model.trainable = False  # Freeze the base model
 
-image = image.astype("float") / 255.0
-image = img_to_array(image)
-image = np.expand_dims(image, axis=0)
-# load the trained convolutional neural network
-print("[INFO] loading network...")
-model = load_model("fusion.h5")
-# classify the input image
-pred_test = model.predict(image)
-y_classes = pred_test.argmax(axis=-1)
-print(y_classes)
-if y_classes==0:
-   print('FLOOD')
+# Build the segmentation model with additional layers
+inputs = Input(shape=(224, 224, 3))
+x = base_model(inputs, training=False)
+x = UpSampling2D(size=(4, 4))(x)
+x = Conv2D(256, (3, 3), padding='same')(x)  # Additional convolution layer
+x = BatchNormalization()(x)
+x = Activation('relu')(x)
+outputs = Conv2D(2, (1, 1), activation='softmax')(x)  # Adjust the filter count if you have more classes
+model = Model(inputs=inputs, outputs=outputs)
+
+path1 = '/workspaces/DeepFlood/Sample mean images/S1_FloodMean.png'
+image = load_img(path1, target_size=(224, 224))  # Load the image using Keras preprocessing
+image = img_to_array(image)  # Convert the image to an array
+image = preprocess_input(image)  # Use the corresponding preprocess_input function
+image = np.expand_dims(image, axis=0)  # Add batch dimension
+
+# Make predictions
+predictions = model.predict(image)
+
+# Post-process the predictions
+predictions = np.argmax(predictions, axis=-1)
+
+# Check for flood or no flood
+if np.any(predictions == 1):
+    print('FLOOD')
 else:
-  print('NOFLOOD')
-#pred_test = model.predict(trainX)
-y_classes = pred_test.argmax(axis=-1)
-
-import matplotlib
-matplotlib.use("Agg")
-# import the necessary packages
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.optimizers import Adam
-from sklearn.model_selection import train_test_split
-from tensorflow.keras.preprocessing.image import img_to_array
-from tensorflow.keras.utils import to_categorical
-
-from imutils import paths
-import matplotlib.pyplot as plt
-import numpy as np
-import argparse
-import random
-import cv2
-import os
-
-#Telabels = []
-# grab the image paths and randomly shuffle them
-imagePaths = sorted(list(paths.list_images("Test/")))
-random.seed(42)
-random.shuffle(imagePaths)
-Xtest = np.zeros((len(imagePaths),75,75,3))
-# loop over the input images
-aa=0
-for imagePath in range(1,len(imagePaths)):
-    image = cv2.imread("Test/"+str(imagePath)+".jpg")
-    image = img_to_array(image)
-    Xtest[aa,:,:,:]=image
-    aa=aa+1
-
-Xtest = np.array(Xtest, dtype="float") / 255.0
-
-imgg=cv2.imread("/content/flood.png")
-wholeImg1=cv2.resize(imgg,(500,500))
-final_img=wholeImg1
-pred_test = model.predict(Xtest)
-y_classes = pred_test.argmax(axis=-1)
-ii=0;
-dd=0;
-while ii<=wholeImg1.shape[0]-1:
-    jj=0;
-    while jj<=wholeImg1.shape[1]-1:
-        imD1=cv2.imread('Test/'+str(dd)+'.jpg');
-        if y_classes[dd]==0:
-            final_img[ii:ii+20,jj:jj+20,0]=0;
-            final_img[ii:ii+20,jj:jj+20,1]=0;
-            final_img[ii:ii+20,jj:jj+20,2]=0;
-        else:
-            final_img[ii:ii+20,jj:jj+20,0]=255
-            final_img[ii:ii+20,jj:jj+20,1]=255
-            final_img[ii:ii+20,jj:jj+20,2]=255
-            
-        dd=dd+1;
-        jj=jj+20;
-
-    ii=ii+20;
-cv2.imwrite('PostFloodWaterMap.jpg', final_img)
+    print('NOFLOOD')
