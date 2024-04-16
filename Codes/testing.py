@@ -5,6 +5,9 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Conv2D, UpSampling2D, BatchNormalization, Activation
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
+from sklearn.metrics import confusion_matrix, classification_report
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Load the pre-trained MobileNetV2 model
 base_model = MobileNetV2(input_shape=(224, 224, 3), include_top=False, weights='imagenet')
@@ -27,9 +30,10 @@ dataset_paths = [
     '/path/to/dataset3'
 ]
 
-# Initialize variables to track accuracy
+# Initialize variables to track performance
 total_images = 0
-correct_predictions = 0
+y_true = []
+y_pred = []
 
 # Loop through the dataset paths
 for dataset_path in dataset_paths:
@@ -45,17 +49,30 @@ for dataset_path in dataset_paths:
             predictions = model.predict(image)
             predictions = np.argmax(predictions, axis=-1)
 
-            # Check for flood or no flood
-            if np.any(predictions == 1):
-                print(f'FLOOD: {filename}')
+            # Track true and predicted labels
+            if dataset_path[-1] == '1':
+                y_true.append(1) # Flood
             else:
-                print(f'NOFLOOD: {filename}')
+                y_true.append(0) # No Flood
+            y_pred.append(predictions[0])
 
-            # Update accuracy tracking
             total_images += 1
-            if (np.any(predictions == 1) and dataset_path[-1] == '1') or (not np.any(predictions == 1) and dataset_path[-1] == '0'):
-                correct_predictions += 1
 
-# Print the overall accuracy
-accuracy = (correct_predictions / total_images) * 100
+# Compute performance metrics
+accuracy = np.mean(np.array(y_true) == np.array(y_pred))
+confusion_mat = confusion_matrix(y_true, y_pred)
+classification_rep = classification_report(y_true, y_pred)
+
 print(f'Accuracy: {accuracy:.2f}%')
+print('Confusion Matrix:')
+print(confusion_mat)
+print('Classification Report:')
+print(classification_rep)
+
+# Visualization
+plt.figure(figsize=(8, 6))
+sns.heatmap(confusion_mat, annot=True, cmap='Blues', fmt='g')
+plt.title('Confusion Matrix')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+plt.show()
