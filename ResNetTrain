@@ -1,0 +1,46 @@
+import numpy as np
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.applications import ResNet50
+from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam
+
+# Load the mean images and labels from the saved files
+mean_images = np.load(r'C:\Users\Jekoc\Desktop\DS340W\DS\MSmean_images.npy')
+labels = np.load(r'C:\Users\Jekoc\Desktop\DS340W\DS\MSlabels.npy')
+
+print("Mean images shape:", mean_images.shape)
+print("Labels shape:", labels.shape)
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(mean_images, labels, test_size=0.2, random_state=42)
+X_train = np.expand_dims(X_train, axis=-1)  # Add an extra dimension for the channel
+X_train = np.repeat(X_train, 3, axis=-1)    # Repeat the grayscale channel to create three channels (RGB)
+X_test = np.expand_dims(X_test, axis=-1)  # Add an extra dimension for the channel
+X_test = np.repeat(X_test, 3, axis=-1)    # Repeat the grayscale channel to create three channels (RGB)
+
+# Load the pre-trained ResNet50 model
+base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+
+# Add GlobalAveragePooling2D layer and Dense output layer
+x = base_model.output
+x = GlobalAveragePooling2D()(x)
+predictions = Dense(1, activation='sigmoid')(x)
+
+# Create the model
+model = Model(inputs=base_model.input, outputs=predictions)
+
+# Freeze all layers in the base model
+for layer in base_model.layers:
+    layer.trainable = False
+
+# Compile the model
+model.compile(optimizer=Adam(), loss='binary_crossentropy', metrics=['accuracy'])
+
+# Train the model
+model.fit(X_train, y_train, epochs=20, batch_size=32, validation_split=0.2)
+
+# Evaluate the model on the test set
+loss, accuracy = model.evaluate(X_test, y_test)
+print("Test Loss:", loss)
+print("Test Accuracy:", accuracy)
