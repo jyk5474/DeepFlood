@@ -4,10 +4,8 @@ from sklearn.model_selection import train_test_split
 from tensorflow.keras.applications import ResNet50
 
 
-# Load the mean images and labels from the saved files
 mean_images = np.load(r'C:\Users\Jekoc\Desktop\DS340W\DS\mean_images.npy')
 labels = np.load(r'C:\Users\Jekoc\Desktop\DS340W\DS\labels.npy')
-
 print("Mean images shape:", mean_images.shape)
 print("Labels shape:", labels.shape)
 
@@ -15,20 +13,18 @@ X_train, X_test, y_train, y_test = train_test_split(mean_images, labels, test_si
 
 base_model = ResNet50(input_shape=(224, 224, 3), include_top=False, weights='imagenet')
 
-# Extract features using the pre-trained ResNet50 model
+# extract features 
 train_features = base_model.predict(X_train)
 test_features = base_model.predict(X_test)
 
-
-# Reshape the features to flatten them
 train_features_flat = X_train.reshape(X_train.shape[0], -1)
 test_features_flat = X_test.reshape(X_test.shape[0], -1)
 
-# Train a Random Forest classifier
+# Train a RFC with the flattened features
 clf = RandomForestClassifier()
 clf.fit(train_features_flat, y_train)
 
-# Predict labels using the trained classifier
+# Predict
 y_pred_train = clf.predict(train_features_flat)
 y_pred_test = clf.predict(test_features_flat)
 
