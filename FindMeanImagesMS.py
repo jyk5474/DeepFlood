@@ -3,55 +3,40 @@ import os
 from PIL import Image
 import json
 
-# Define the dataset root directory
 dataset_root = r'C:\Users\Jekoc\Desktop\DS340W\DS\SEN12FLOOD'
-
-# Load the JSON data
 with open(r'C:\Users\Jekoc\Desktop\DS340W\DS\SEN12FLOOD\S2list.json') as json_file:
     data = json.load(json_file)
-
 numbered_folders = [folder for folder in os.listdir(dataset_root) if os.path.isdir(os.path.join(dataset_root, folder))]
 
-# Initialize lists to store mean images and labels
 mean_images = []
 labels = []
 
-# Define the target size for resizing the images
+
 target_size = (224, 224)
 
-# Loop through each numbered folder
 for folder in numbered_folders:
     folder_path = os.path.join(dataset_root, folder)
-    
-    # Skip if it's not a directory
     if not os.path.isdir(folder_path):
         continue
     
     # Initialize a dictionary to store images for each date
     date_images = {}
-    
-    # Loop through each image file in the folder
     for file_name in os.listdir(folder_path):
-        # Skip non-TIF files
         if not file_name.endswith('.tif'):
             continue
         
-        # Check if the file starts with 'S2'
         if file_name.startswith('S2'):
-            # Extract the date from the file name
+            # extract date from the file name
             date = file_name.split('_')[1][:10]  # Extract the date from the file name
             
-            # Add the image to the corresponding date group
+            # add the image to the date group
             if date in date_images:
                 date_images[date].append(file_name)
             else:
                 date_images[date] = [file_name]
     
-    # Process images for each date group
     for date, image_list in date_images.items():
-        # Check if there are exactly 12 images for the date
         if len(image_list) == 12:
-            # Load and preprocess each image
             images = []
             for image_name in image_list:
                 image_path = os.path.join(folder_path, image_name)
@@ -64,14 +49,11 @@ for folder in numbered_folders:
             
             # Check if any images were loaded successfully
             if len(images) == 12:
-                # Calculate the mean image
+                # find the mean image
                 mean_image = np.mean(images, axis=0)
                 mean_images.append(mean_image)
-                
-                # Look up the folder in the JSON data
                 folder_data = data.get(folder, {})
                 
-                # Look up the flooding label for the date
                 flooding_label = False
                 for entry in folder_data.values():
                     entry_date = entry.get('date')
@@ -88,7 +70,7 @@ for folder in numbered_folders:
             else:
                 print(f"Skipping date {date} in folder {folder} due to inability to open some images")
 
-# Convert lists to numpy arrays
+
 mean_images = np.array(mean_images)
 labels = np.array(labels)
 
@@ -96,6 +78,6 @@ print("Mean images shape:", mean_images.shape)
 print("Labels shape:", labels.shape)
 print(labels)
 
-# Save the mean images and labels
+# save the mean images and labels
 np.save(r'C:\Users\Jekoc\Desktop\DS340W\DS\MSmean_images.npy', mean_images)
 np.save(r'C:\Users\Jekoc\Desktop\DS340W\DS\MSlabels.npy', labels)
